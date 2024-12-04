@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Classification</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/script.js" defer></script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="nav-container">
+            <h1>Mental Health Classification Using Random Forest and XGBoost</h1>
+        </div>
+
+        <div class="dropdown">
+            <label for="dataset-select" class="dropdown-label">Dataset 3000 (3) Data 46 Fitur (40% data testing)</label>
+            <select id="dataset-select" onchange="window.location.href=this.value;">
+                <option value="">Pilih Dataset...</option>
+                <option value="/data1">Dataset 100 Data 63 Fitur</option>
+                <option value="/data2">Dataset 3000 (1) Data 46 Fitur</option>
+                <option value="/data3">Dataset 3000 (2) Data 46 Fitur</option>
+                <option value="/data5">Dataset 5000 (1) Data 46 Fitur</option>
+                <option value="/data6">Dataset 5000 (2) Data 46 Fitur</option>
+                <option value="/data7">Dataset 5000 (3) Data 46 Fitur</option>
+                <option value="/data8">Dataset 10000 (1) Data 46 Fitur</option>
+                <option value="/data9">Dataset 10000 (2) Data 46 Fitur</option>
+                <option value="/data10">Dataset 10000 (3) Data 46 Fitur</option>
+            </select>
+        </div>
+
+        <br><B><p>Terdiagnosa : {{ yes_count4 }} | Tidak terdiagnosa: {{ no_count4 }}</p></B>
+
+        <article class="content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for column in data.columns %}
+                                <th>{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index, row in data.iterrows() %}
+                            <tr>
+                                {% for item in row %}
+                                    <td>{{ item }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('index2', page=page-1) }}">&laquo; Previous</a>
+            {% endif %}
+
+            <a href="{{ url_for('index2', page=1) }}" class="{% if page == 1 %}active{% endif %}">1</a>
+
+            {% if page > 5 %}
+                <span>...</span>
+            {% endif %}
+
+            {% for i in range((page - 2) if (page - 2) > 2 else 2, (page + 3) if (page + 3) < (total_pages - 1) else (total_pages - 1) + 1) %}
+                <a href="{{ url_for('index2', page=i) }}" class="{% if page == i %}active{% endif %}">{{ i }}</a>
+            {% endfor %}
+
+            {% if page < total_pages - 4 %}
+                <span>...</span>
+            {% endif %}
+
+            <a href="{{ url_for('index2', page=total_pages) }}" class="{% if page == total_pages %}active{% endif %}">{{ total_pages }}</a>
+
+            {% if page < total_pages %}
+                <a href="{{ url_for('index2', page=page+1) }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+
+        <!-- Button untuk menjalankan model -->
+        <button id="runModel" class="button">Run Models</button>
+
+        <div id="results-training" class="results-container-training" style="display:none;">
+            <h3 style="font-size: 30px; margin-bottom: 5px;">Training</h3>
+            <div class="result-wrapper">
+                <div class="result-box-training">
+                    <h2>Random Forest</h2>
+                    <img id="confusion_rf" src="/static/confusion_matrix_rf_training3K3.png" alt="Confusion Matrix Random Forest" />
+                    <p>True Positive: <span id="TP_train_rf"></span></p>
+                    <p>True Negative: <span id="TN_train_rf"></span></p>
+                    <p>False Positive: <span id="FP_train_rf"></span></p>
+                    <p>False Negative: <span id="FN_train_rf"></span></p>
+                </div>
+                <div class="result-box-training">
+                    <h2>XGBoost</h2>
+                    <img id="confusion_xgb" src="/static/confusion_matrix_xgb_training3K3.png" alt="Confusion Matrix XGBoost" />
+                    <p>True Positive: <span id="TP_train_xgb"></span></p>
+                    <p>True Negative: <span id="TN_train_xgb"></span></p>
+                    <p>False Positive: <span id="FP_train_xgb"></span></p>
+                    <p>False Negative: <span id="FN_train_xgb"></span></p>
+                </div>
+            </div>
+            <b><p class="summary-text">Terdiagnosa : <span id="Yes_train"></span> | Tidak terdiagnosa : <span id="No_train"></span></p></b>
+        </div>
+    <br>
+        <div id="results" class="results-container-testing" style="display:none;">
+            <h3 style="font-size: 30px; margin-bottom: 5px;">Testing</h3>
+            <div class="result-wrapper">
+            <div class="result-box-testing">
+                <h2>Random Forest</h2>
+                <img id="confusion_rf" src="/static/confusion_matrix_rf3K3.png" alt="Confusion Matrix Random Forest" />
+                <p>True Positive: <span id="TP_rf"></span></p>
+                <p>True Negative: <span id="TN_rf"></span></p>
+                <p>False Positive: <span id="FP_rf"></span></p>
+                <p>False Negative: <span id="FN_rf"></span></p>
+                <p>~~~~~~~~~~~~~~~~~~~~</p>
+                <p>Accuracy of Random Forest: <span id="accuracy_rf"></span></p>
+                <p>Precision of Random Forest: <span id="precision_rf"></span></p>
+                <p>Recall of Random Forest: <span id="recall_rf"></span></p>
+                <p>F1-Score of Random Forest: <span id="f1_rf"></span></p>
+            </div>
+            <div class="result-box-testing">
+                <h2>XGBoost</h2>
+                <img id="confusion_xgb" src="/static/confusion_matrix_xgb3K3.png" alt="Confusion Matrix XGBoost" />
+                <p>True Positive: <span id="TP_xgb"></span></p>
+                <p>True Negative: <span id="TN_xgb"></span></p>
+                <p>False Positive: <span id="FP_xgb"></span></p>
+                <p>False Negative: <span id="FN_xgb"></span></p>
+                <p>~~~~~~~~~~~~~~~~~~~~</p>
+                <p>Accuracy of XGBoost: <span id="accuracy_xgb"></span></p>
+                <p>Precision of XGBoost: <span id="precision_xgb"></span></p>
+                <p>Recall of XGBoost: <span id="recall_xgb"></span></p>
+                <p>F1-Score of XGBoost: <span id="f1_xgb"></span></p>
+            </div>
+        </div>
+        <b><p class="summary-text">Terdiagnosa : <span id="Yes"></span> | Tidak terdiagnosa : <span id="No"></span></p></b>
+        </div>
+    <br>
+        <div id="comparison_chart_container" class="comparison-container" style="display:none;">
+            <h3>Accuracy Comparison</h3>
+            <img id="comparison_chart" src="/static/accuracy_comparison3K3.png" alt="Accuracy Comparison Chart" />
+            <p id="comparison_result"></p>
+        </div>
+
+        <div id="loadingScreen" class="loading-screen">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('runModel').addEventListener('click', async function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.classList.add('active');
+
+            this.disabled = true;
+            this.textContent = 'Running...';
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            choice = 4
+            const response = await fetch(`/run-models?choice=${choice}`);
+            const data = await response.json();
+
+            document.getElementById('accuracy_rf').textContent = (data.accuracy_rf * 100).toFixed(2) + '%';
+            document.getElementById('accuracy_xgb').textContent = (data.accuracy_xgb * 100).toFixed(2) + '%';
+            document.getElementById('precision_rf').textContent = (data.precision_rf * 100).toFixed(2) + '%';
+            document.getElementById('precision_xgb').textContent = (data.precision_xgb * 100).toFixed(2) + '%';
+            document.getElementById('recall_rf').textContent = (data.recall_rf * 100).toFixed(2) + '%';
+            document.getElementById('recall_xgb').textContent = (data.recall_xgb * 100).toFixed(2) + '%';
+            document.getElementById('f1_rf').textContent = (data.f1_rf * 100).toFixed(2) + '%';
+            document.getElementById('f1_xgb').textContent = (data.f1_xgb * 100).toFixed(2) + '%';
+            document.getElementById('TP_rf').textContent = (data.TP_rf);
+            document.getElementById('TP_xgb').textContent = (data.TP_xgb);
+            document.getElementById('TN_rf').textContent = (data.TN_rf);
+            document.getElementById('TN_xgb').textContent = (data.TN_xgb);
+            document.getElementById('FP_rf').textContent = (data.FP_rf);
+            document.getElementById('FP_xgb').textContent = (data.FP_xgb);
+            document.getElementById('FN_rf').textContent = (data.FN_rf);
+            document.getElementById('FN_xgb').textContent = (data.FN_xgb);
+            document.getElementById('Yes').textContent = (data.Yes);
+            document.getElementById('No').textContent = (data.No);
+            document.getElementById('TP_train_rf').textContent = (data.TP_train_rf);
+            document.getElementById('TP_train_xgb').textContent = (data.TP_train_xgb);
+            document.getElementById('TN_train_rf').textContent = (data.TN_train_rf);
+            document.getElementById('TN_train_xgb').textContent = (data.TN_train_xgb);
+            document.getElementById('FP_train_rf').textContent = (data.FP_train_rf);
+            document.getElementById('FP_train_xgb').textContent = (data.FP_train_xgb);
+            document.getElementById('FN_train_rf').textContent = (data.FN_train_rf);
+            document.getElementById('FN_train_xgb').textContent = (data.FN_train_xgb);
+            document.getElementById('Yes_train').textContent = (data.Yes_train);
+            document.getElementById('No_train').textContent = (data.No_train);
+            document.getElementById("comparison_result").innerText = data.result_text;
+
+            document.getElementById('results').style.display = 'flex';
+            document.getElementById('results-training').style.display = 'flex';
+            document.getElementById('comparison_chart_container').style.display = 'block';
+
+            window.scrollTo({
+                top: document.getElementById('results').offsetTop,
+                behavior: 'smooth'
+            });
+
+            loadingScreen.classList.remove('active');
+            this.textContent = 'Run Models';
+            this.disabled = false;
+        });
+    </script>
+</body>
+</html>
