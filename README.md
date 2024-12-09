@@ -1,3 +1,5 @@
+Sebagai syarat untuk dapat mengolah data, maka dibutuhkan visual studio code dan install extension python didalamnya 
+
 Sebelum menjalankan sistemnya, diperlukan untuk install library terlebih dahulu untuk mendukung proses pelatihan model.
 
 pip install pandas 
