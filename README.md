@@ -29,4 +29,8 @@ import pandas as pd
 import (masing-masing nama file .py yang digunakan) misalnya pada sistem ini terdapat 9 macam pelatihan,maka akan import semuanya ke flask dengan cara dibawah ini
 import Main3k1, Main3k2, Main3k3, Main5k1, Main5k2, Main5k3, Main10k1, Main10k2, Main10k3, Main100
 
+untuk menjalankan flask, maka dibutuhkan untuk menjalankan prompt dibawah ini :
+1. CD skripsi = untuk memasuk ke dalam folder skripsi
+2. Python app.py = untuk menjalankan flask yang nantinya akan mendapatkan link url local yang dapat menuju ke halaman web
+
 
